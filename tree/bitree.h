@@ -10,6 +10,7 @@ struct bitree_node {
 struct bitree_tree {
     int size;
     struct bitree_node *root;
+    int (*compare)(const void *key1, const void *key2);
     void (*destroy)(void *data); // destroy data;
 };
 
@@ -100,7 +101,7 @@ extern "C" {
 #define bitree_data(node) ((node)->data)
 #define bitree_left(node) ((node)->left)
 #define bitree_right(node) ((node)->right)
-
+#define bitree_is_eob(node) ((node) == NULL)
 // #define data2node(data) \
 //     (struct bitree_node*)((char *)data - \
 //                           (unsigned long)(((struct bitree_node*)(0))->data))

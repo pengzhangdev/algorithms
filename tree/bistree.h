@@ -4,7 +4,20 @@
 #include <stdio.h>
 #include "bitree.h"
 
-typedef bitree_tree isTree;
+typedef struct bitree_tree BisTree;
+typedef struct bitree_node BiTreeNode;
+
+typedef struct AvlNode_ {
+    void *data;
+    int hidden;
+    int factor;
+} AvlNode;
+
+enum avl_balance_state_{
+    AVL_RGT_HEAVY = -1,
+    AVL_BALANCED = 0,
+    AVL_LET_HEAVY = 1,
+};
 
 /**
  * init binary search tree
@@ -30,11 +43,22 @@ void bistree_destroy(BisTree *tree);
  * @tree        global binary search tree struct
  * @return      return 0 on success otherwise return -1
  */
-int bistree_insert(BisTree *tree, const char *data);
+int bistree_insert(BisTree *tree, const void *data);
 
 /**
  * remove @data from @tree
  */
-int bistree_remove(BisTree *tree, const char *data);
+int bistree_remove(BisTree *tree, const void *data);
+
+
+/**
+ * lookup data
+ */
+int bistree_lookup(BisTree *tree, void **data);
+
+static inline size_t bistree_size(BisTree *tree)
+{
+    return tree->size;
+}
 
 #endif

@@ -1,3 +1,17 @@
+### Makefile ---
+##
+## Filename: Makefile
+## Description: The target of this makefile is to handle muti target with muti makefile, each containing one target.
+## Author: Peng Zhang
+## Maintainer: Peng Zhang
+## Created: Sun Feb 16 20:52:38 2014 (+0800)
+## Version:
+## Last-Updated:Sun Feb 16 20:55:09 2014 (+0800)
+##           By: Peng Zhang
+##     Update #: 1
+
+######################### args define ##############################
+
 CC := gcc
 CXX := g++
 CFLAGS := -O2 -g -D_DEBUG
@@ -47,6 +61,8 @@ $(warning "build static library")
         LDFLAGS += -static
 endif
 
+
+################################### rules start ###################################
 all: $(LOCAL_MODULE)
 
 %.o: %.c
@@ -92,8 +108,24 @@ check-syntax:
 
 .PHONY: clean
 clean :
-	-rm -r $(LOCAL_MODULE)
+	-rm -r $(LOCAL_MODULE) ./*/*.o
 
 .PHONY: distclean
 distclean :
 	-rm -r $(DEPEND_DIR) ./*/*.o $(LOCAL_MODULE)
+	#$(call call-all-subdir-makefiles)
+
+
+########################## function define ##############################
+
+ifndef call-all-subdir-makefiles
+define call-all-subdir-makefiles
+	echo "function called"
+endef
+endif
+
+ifndef clear-all-vars
+define clear-all-vars
+
+endef
+endif
