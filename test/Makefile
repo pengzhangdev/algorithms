@@ -36,7 +36,7 @@ LOCAL_INCLUDES := \
     ./include \
 #       $(shell pwd)/../log/ \
 
-LOCAL_MODULE := libalg.so
+LOCAL_MODULE := test
 
 
 CFLAGS += $(LOCAL_CFLAGS)
@@ -64,7 +64,7 @@ endif
 
 
 ################################### rules start ###################################
-all: $(LOCAL_MODULE) submodule
+all: $(LOCAL_MODULE)
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -I$(INCLUDES) $< -o $@
@@ -100,7 +100,7 @@ $(LOCAL_MODULE) : $(filter %.o, $(LOCAL_SRCS:.c=.o)) $(filter %.o, $(LOCAL_SRCS:
 
 # subdir makefile
 submodule:
-	$(call call-subdir-makefiles,test)
+	$(call call-subdir-makefiles, "test")
 
 # add for flymake
 .PHONY: check-syntax
@@ -128,7 +128,7 @@ distclean :
 ifndef call-subdir-makefiles
 define call-subdir-makefiles
 	echo "make subdir"
-	make -C $(LOCAL_PATH)/$(1)
+	make -c $(LOCAL_PATH)/$(1)
 endef
 endif
 
