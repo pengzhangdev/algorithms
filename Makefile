@@ -21,10 +21,10 @@ LDFLAGS :=
 COMPILER := $(CC)
 
 LOCAL_C_SRCS := \
-        $(wildcard *.c ./*/*.c) \
+        $(wildcard *.c ./src/*/*.c) \
 
 LOCAL_CPP_SRCS := \
-        $(wildcard *.cpp ./*/*.cpp) \
+        $(wildcard *.cpp ./src/*/*.cpp) \
 
 LOCAL_SRCS := \
         $(LOCAL_C_SRCS) \
@@ -108,11 +108,13 @@ check-syntax:
 
 .PHONY: clean
 clean :
-	-rm -r $(LOCAL_MODULE) ./*/*.o
+	-rm -r $(LOCAL_MODULE)
+	-find ./ -name "*.o" -exec rm '{}' \;
 
 .PHONY: distclean
 distclean :
-	-rm -r $(DEPEND_DIR) ./*/*.o $(LOCAL_MODULE)
+	-rm -r $(DEPEND_DIR)  $(LOCAL_MODULE)
+	-find ./ -name "*.o" -exec rm '{}' \;
 	#$(call call-all-subdir-makefiles)
 
 
