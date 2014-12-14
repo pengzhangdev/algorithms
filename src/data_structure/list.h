@@ -1,127 +1,156 @@
 /**
- * The basic list
+ * This if the common interface for double linked list.
+ * based on list.h from e2fsprogs
  */
 
-#ifndef _ALG_LIST_H
-#define _ALG_LIST_H
+#ifndef COMMON_MLIST_H
+#define COMMON_MLIST_H
 
-struct alg_list_node {
-    struct alg_list *prev;
-    struct alg_list *next;
+
+struct list_node  // double linkded list node
+{
+    struct list_node * next, *prev;
 };
 
+/**
+ * init the ptr as the head of a list, the head is empty.
+ * @ptr,  the list_node
+ */
+#define M_INIT_LIST_HEAD(ptr)                   \
+    do {                                        \
+        (ptr)->next = (ptr);                    \
+        (ptr)->prev = (ptr);                    \
+    } while(0)
 
-#define ALG_LIST_INIT(head) \
-    do {                             \
-        (head)->prev = (head);       \
-        (head)->next = (head);       \
-    }while(0)                        \
 
-#define GET_LIST_DATA(type, mem, pos)           \
-    ((type *)((unsigned int)pos - (unsigned long)(&((type*)0)->mem)))   \
-
-static inline void alg_list_add (struct alg_list_node *ahead,
-                             struct alg_list_node *back,
-                             struct alg_list_node *add)
+/**
+ * Insert the node @add between the node prev and next
+ * @add,  the node to add.
+ * @prev, the node before @add after insertion.
+ * @next, the node after @add after insertion.
+ */
+static inline void __mlist_add(struct list_node * add,
+                               struct list_node * prev ,
+                               struct list_node * next)
 {
-    ahead->next = add;
-    add->prev = ahead;
-    add->next = back;
-    back->prev = add;
+    prev->next = add;
+    next->prev = add;
+    add->prev = prev;
+    add->next = next;
 }
 
 /**
- * @add, the node to add
- * @to,  the node to be added ahead
+ * Insert @add before @node
+ * @add,  the list_node to be inserted
+ * @node, the list_node after @add after insertion.
  */
-static inline void alg_list_add_ahead(struct alg_list_node *add,
-                                 struct alg_list_node *to)
+static inline void mlist_add_ahead(struct list_node * add,
+                                   struct list_node * node)
 {
-    alg_list_add(to->prev, to, add);
+    __mlist_add(add, node->prev, node);
 }
 
 /**
- * @add,  the node to add
- * @to,   the node to be added back
+ * Insert @add after @node
+ * @add,  the list_node to be inserted
+ * @node, the list_node after @add after insertion
  */
-static inline void alg_list_add_back(struct alg_list_node *add,
-                                     struct alg_list_node *to)
+static inline void mlist_add_tail(struct list_node * add,
+                                  struct list_node * node)
 {
-    alg_list_add(to, to->next, add);
+    __mlist_add(add, node, node->next);
 }
 
 /**
- * del node between @before and @back
+ * Delete the node between @prev and @next
+ * @prev,  the list_node before the node to be deleted
+ * @next,  the list_node after the node to be deleted
  */
-static inline void alg_list_del_(struct alg_list_node *before,
-                                 struct alg_list_node *back)
+static inline void __mlist_delete(struct list_node * prev,
+                                  struct list_node * next)
 {
-    before->next = back;
-    back->prev = before;
+    prev->next = next;
+    next->prev = prev;
 }
 
 /**
- * del node @del
+ * Delete node @del
+ * @del,  the list_node to be deleted
  */
-static inline void alg_list_del(struct alg_list_node *del)
+static inline void mlist_delete(struct list_node * del)
 {
-    alg_list_del_(del->prev, del->next);
-    del->prev = NULL;
-    del->next = NULL;
+    __mlist_delete(del->prev, del->next);
 }
 
-/**
- * treat the list as stack, and add @add to the first of @head
+/*
+ * add @add to the tail of @head
  */
-static inline void alg_list_push(struct alg_list_node *head,
-                                 struct alg_list_node *add)
+static inline void mlist_enqueue(struct list_node *head,
+                                 struct list_node *add)
 {
-    alg_list_add(head, head->next, add);
+    mlist_add_tail(add, head->prev);
 }
 
-/**
- * treat the list as stack, del the first of @head and return ;
+/*
+ * delete a node from the head of @head
  */
-static inline struct alg_list_node* alg_list_pop(struct alg_list_node *head) {
-    struct alg_list_node *node = head->next;
-    alg_list_del(node);
-    return node;
-}
-
-/**
- * treat the list as queue, add the @add the the tail of @head
- */
-static inline void alg_list_enqueue(struct alg_list_node *head,
-                                    struct alg_list_node *add)
+static inline void mlist_dequeue(struct list_node *head)
 {
-    alg_list_add(head, head->prev, add);
+    struct list_node *node = head->next;
+    mlist_delete(node);
 }
 
 /**
- * treat the list as queue, del the first of @head and return;
+ * Check whether the list is empty.
+ * @head,  the head of the list
  */
-static inline struct alg_list_node *alg_list_dequeue(struct alg_list_node *head)
-{
-    struct alg_list_node *node = head->next;
-    alg_list_del(node);
-    return node;
-}
-
-/**
- * check whether the head is empty
- */
-static inline int alg_list_is_empty(struct alg_list_node *head)
+static inline int mlist_is_empty(struct list_node * head)
 {
     return (head->next == head);
 }
 
 /**
- * check whether the @node is the tail of @head
+ * Check whether the node is the tail of a list.
+ * @head, the head of a specify list.
+ * @node, the node to be cheked.
  */
-static inline int alg_list_is_tail(struct alg_list_node *head,
-                                   struct alg_list_node *node)
+static inline int mlist_is_tail(struct list_node * head,
+                                struct list_node * node)
 {
     return (head->prev == node);
 }
+
+#define list_entry(ptr, type, member)                                   \
+    ( (type *)( (char *)(ptr) - (unsigned long)( &((type*)(0))->member ) ) )
+
+#define list_head(head, type, member)           \
+    list_entry((head)->next, type, member)
+
+#define list_tail(head, type, member)           \
+    list_entry((head)->prev, type, member)
+
+#define list_next(entry, type, member)              \
+    list_entry((entry)->node.next, type, member)
+
+#define list_prev(entry, type, member)          \
+    list_entry((entry)->node.prev, type, member)
+
+#define list_for_each_safely(pos, pnext, head)                          \
+    for (pos = (head)->next , pnext = pos->next; pos != (head); pos = pnext, pnext = pos->next )
+
+#define list_for_entry_safely(pos, pnext, head, type, member)           \
+    for (pos = list_head(head, type, member), pnext = list_next(pos, type, member); \
+         &(pos->node) != head;                                          \
+         pos = pnext, pnext = list_next(pos, type, member))
+
+#define list_for_next_safely(pos, pnext, head, entry, type, member) \
+    for (pos = entry, pnext = list_next(pos, type, member);         \
+         &(pos->node) != head;                                      \
+         pos = pnext, pnext = list_next(pos, type, member))
+
+#define list_for_prev_safely(pos, pprev, head, entry, type, member) \
+    for (pos = entry, pprev = list_prev(pos, type, member);         \
+         &(pos->node) != head;                                      \
+         pos = pprev, pprev = list_prev(pos, type, member))
 
 #endif
